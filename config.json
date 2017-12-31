@@ -1,0 +1,5 @@
+{
+  "socketURL": "https://avrtc.herokuapp.com:9001/",
+  "socketMessageEvent": "RTCMultiConnection-Message",
+  "socketCustomEvent": "RTCMultiConnection-Custom-Message"
+}

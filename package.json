@@ -1,0 +1,47 @@
+{
+  "name": "rtcsignaling.io",
+  "preferGlobal": false,
+  "version": "1.0.0",
+  "author": {
+    "name": "AVSPEED",
+    "email": "info@avspeed.com",
+    "url": "https://avspeed.github.io/"
+  },
+  "description": "Signaling server for the iConfRTC SDK",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/avspeed/RTCSignaling.io.git"
+  },
+  "keywords": [
+    "peer-to-peer",
+    "peer2peer",
+    "peer",
+    "webrtc",
+    "video-chat"
+  ],
+  "dependencies": {
+    "socket.io": "0.9.17"
+  },
+  "analyze": false,
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "bugs": {
+    "url": "https://github.com/avspeed/RTCSignaling.io/issues",
+    "email": "info@avspeed.com"
+  },
+  "homepage": "",
+  "devDependencies": {
+    "grunt": "0.4.5",
+    "grunt-bump": "0.7.0",
+    "grunt-cli": "0.1.13",
+    "grunt-contrib-clean": "0.6.0",
+    "grunt-contrib-concat": "0.5.1",
+    "grunt-contrib-copy": "0.8.2",
+    "grunt-contrib-uglify": "0.11.0",
+    "grunt-jsbeautifier": "0.2.10",
+    "grunt-replace": "0.11.0",
+    "load-grunt-tasks": "3.4.0",
+    "socket.io": "^0.9.17"
+  }
+}
