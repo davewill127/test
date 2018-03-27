@@ -8,6 +8,7 @@
 console.log(process.argv);
 
 var isUseHTTPs = !(!!process.env.PORT || !!process.env.IP);
+console.log(process.env.PORT);
 console.log('https ' + isUseHTTPs);
 isUseHTTPs = false;
 var server = require(isUseHTTPs ? 'https' : 'http'),
