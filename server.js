@@ -60,7 +60,7 @@ var app;
 
 app = server.createServer(serverHandler);
 
-app = app.listen(process.env.port, process.env.IP || "0.0.0.0", function() {
+app = app.listen(process.env.PORT || 3000, process.env.IP || "0.0.0.0", function() {
     var addr = app.address();
     //console.log('RTC Signaling Server listening on port ' + app.get('port'));
     console.log("AVSPEED RTC Signaling Server listening at ", addr.address + ":" + addr.port);
