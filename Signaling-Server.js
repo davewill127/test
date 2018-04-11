@@ -103,7 +103,7 @@ module.exports = exports = function(app, socketCallback) {
             //send a new list of users w/ session to view to the users in my meeting
             var tempList = _.where(users, { meetingID: meetingID });
 
-            io.to(meetingID).emit('onJoinedMeeting', meetingID, socket.id, socket.username, socket.session, tempList);
+            socket.broadcast.to(meetingID).emit('onJoinedMeeting', meetingID, socket.id, socket.username, socket.session, tempList);
             socket.emit('onSelfJoinedMeeting', meetingID, socket.id, socket.username, socket.session, tempList);
         });
 
@@ -112,7 +112,7 @@ module.exports = exports = function(app, socketCallback) {
 
             delete users[socket.id];
             delete listOfUsers[socket.id];
-            io.to(meetingID).emit('onUserLeftMeeting', meetingID, socket.id, socket.username, socket.session);
+            socket.broadcast.to(meetingID).emit('onUserLeftMeeting', meetingID, socket.id, socket.username, socket.session);
             socket.emit('onSelfLeftMeeting', meetingID, socket.id, socket.username, socket.session);
         });
 
@@ -121,9 +121,9 @@ module.exports = exports = function(app, socketCallback) {
 
             console.log('user name is ' + socket.username);
             if (toUser != "") {
-                io.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, true);
+                io.in(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, true);
             } else {
-                io.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, false);
+                io.in(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, false);
             }
         });
 
@@ -370,7 +370,7 @@ module.exports = exports = function(app, socketCallback) {
                 delete socket.namespace.sockets[this.id];
                 delete users[this.id];
                 delete listOfUsers[this.id];
-                io.to(meetingID).emit('onUserLeftMeeting', meetingID, this.id, this.username, this.session);
+                socket.broadcast.to(meetingID).emit('onUserLeftMeeting', meetingID, this.id, this.username, this.session);
                 socket.emit('onSelfLeftMeeting', meetingID, this.id, this.username, this.session);
             } catch (e) {}
 
