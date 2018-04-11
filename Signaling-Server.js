@@ -95,7 +95,7 @@ module.exports = exports = function(app, socketCallback) {
 
         socket.on('JoinMeeting', function(meetingID) {
 
-            console.log('joining with socket id ' + socket.id + ' user ' + socket.username);
+            console.log('joining ' + meetingID + ' with socket id ' + socket.id + ' user ' + socket.username);
             socket.join(meetingID);
             //update user list with current meeting ID
             users[socket.id].meetingID = meetingID;
