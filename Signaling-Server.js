@@ -122,7 +122,7 @@ module.exports = exports = function(app, socketCallback) {
             if (toUser != "") {
                 socket.broadcast.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, true);
             } else {
-                socket.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, false);
+                io.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, false);
             }
         });
 
