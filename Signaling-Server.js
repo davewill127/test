@@ -122,8 +122,7 @@ module.exports = exports = function(app, socketCallback) {
             if (toUser != "") {
                 socket.broadcast.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, true);
             } else {
-                //todo gsiry 9/19/2016
-                //socket.broadcast.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, true);
+                socket.broadcast.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, false);
             }
         });
 
