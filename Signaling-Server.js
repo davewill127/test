@@ -17,7 +17,7 @@ module.exports = exports = function(app, socketCallback) {
 
     try {
         io = io(app, {
-            log: false,
+            log: true,
             origins: '*:*'
         });
         io.on('connection', onConnection);
