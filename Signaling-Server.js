@@ -121,9 +121,9 @@ module.exports = exports = function(app, socketCallback) {
 
             console.log('user name is ' + socket.username);
             if (toUser != "") {
-                io.in(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, true);
+                io.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, true);
             } else {
-                io.in(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, false);
+                io.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, false);
             }
         });
 
