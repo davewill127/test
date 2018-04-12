@@ -100,6 +100,7 @@ module.exports = exports = function(app, socketCallback) {
             //update user list with current meeting ID
             users[socket.id].meetingID = meetingID;
 
+            console.log('just checking ..' + users[socket.id].meetingID)
             //send a new list of users w/ session to view to the users in my meeting
             var tempList = _.where(users, { meetingID: meetingID });
 
