@@ -367,7 +367,7 @@ module.exports = exports = function(app, socketCallback) {
         socket.on('disconnect', function() {
             try {
                 var meetingID = users[this.id].meetingID;
-
+                console.log(this.username + 'has left..');
                 delete socket.namespace.sockets[this.id];
                 delete users[this.id];
                 delete listOfUsers[this.id];
