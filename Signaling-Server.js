@@ -119,7 +119,7 @@ module.exports = exports = function(app, socketCallback) {
         socket.on('SendMessageToMeeting', function(message, toUser) {
             var meetingID = users[socket.id].meetingID;
 
-            console.log('user name is ' + socket.username);
+            console.log('user name is ' + socket.username + ' meeting is ' + meetingID);
             if (toUser != "") {
                 io.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, true);
             } else {
