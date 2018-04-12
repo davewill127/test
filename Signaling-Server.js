@@ -368,11 +368,11 @@ module.exports = exports = function(app, socketCallback) {
             try {
                 var meetingID = users[this.id].meetingID;
                 console.log(this.username + 'has left..');
+                io.to(meetingID).emit('onUserLeftMeeting', meetingID, this.id, this.username, this.session);
                 delete socket.namespace.sockets[this.id];
                 delete users[this.id];
                 delete listOfUsers[this.id];
-                socket.broadcast.to(meetingID).emit('onUserLeftMeeting', meetingID, this.id, this.username, this.session);
-                socket.emit('onSelfLeftMeeting', meetingID, this.id, this.username, this.session);
+                
             } catch (e) {}
 
             try {
