@@ -7,7 +7,7 @@
 
 module.exports = exports = function(app, socketCallback) {
     var listOfUsers = {};
-    var users = {};
+    var users = [];
     var shiftedModerationControls = {};
     var ScalableBroadcast;
 
@@ -379,9 +379,11 @@ module.exports = exports = function(app, socketCallback) {
 
                 console.log('about to delete sockets');
                 console.log(JSON.stringify(users, null, 4));
-                delete socket.namespace.sockets[this.id];
+                
                 delete users[this.id];
                 delete listOfUsers[this.id];
+                delete socket.namespace.sockets[this.id];
+                
                 console.log(JSON.stringify(users, null, 4));   
                 console.log(users +' after');
                 
