@@ -111,9 +111,13 @@ module.exports = exports = function(app, socketCallback) {
         socket.on('LeaveMeeting', function() {
             var meetingID = users[socket.id].meetingID;
 
-            delete users[socket.id];
-            delete listOfUsers[socket.id];
-            socket.broadcast.to(meetingID).emit('onUserLeftMeeting', meetingID, socket.id, socket.username, socket.session);
+            io.to(meetingID).emit('onUserLeftMeeting', meetingID, socket.id, socket.username, socket.session);
+
+            socket.disconnect();
+
+            // delete users[socket.id];
+            // delete listOfUsers[socket.id];
+            
             socket.emit('onSelfLeftMeeting', meetingID, socket.id, socket.username, socket.session);
         });
 
