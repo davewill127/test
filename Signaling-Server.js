@@ -74,13 +74,13 @@ module.exports = exports = function(app, socketCallback) {
         var decodedUser = decodedUserStr.toString();
 
         socket.userid = params.userid;
-        socket.username = decodedUser;
+        socket.userName = decodedUser;
         socket.session = params.session;
 
         //main user list
         users[socket.id] = {
             id: socket.id,
-            userName: socket.username,
+            userName: socket.userName,
             session: socket.session
         };
 
@@ -89,30 +89,30 @@ module.exports = exports = function(app, socketCallback) {
             connectedWith: {},
             isPublic: false, // means: isPublicModerator
             extra: {},
-            userName: socket.username,
+            userName: socket.userName,
             session: socket.session
         };
 
-        socket.on('JoinMeeting', function(meetingID) {
+        socket.on('JoinMeeting', function(meetingId) {
 
-            console.log('joining ' + meetingID + ' with socket id ' + socket.id + ' user ' + socket.username);
-            socket.join(meetingID);
+            console.log('joining ' + meetingId + ' with socket id ' + socket.id + ' user ' + socket.userName);
+            socket.join(meetingId);
             //update user list with current meeting ID
-            users[socket.id].meetingID = meetingID;
+            users[socket.id].meetingId = meetingId;
 
-            console.log('just checking ..' + users[socket.id].meetingID)
+            console.log('just checking ..' + users[socket.id].meetingId)
             //send a new list of users w/ session to view to the users in my meeting
-            var tempList = _.where(users, { meetingID: meetingID });
+            var tempList = _.where(users, { meetingId: meetingId });
 
-            socket.broadcast.to(meetingID).emit('onJoinedMeeting', meetingID, socket.id, socket.username, socket.session, tempList);
-            socket.emit('onSelfJoinedMeeting', meetingID, socket.id, socket.username, socket.session, tempList);
+            socket.broadcast.to(meetingId).emit('onJoinedMeeting', meetingId, socket.id, socket.userName, socket.session, tempList);
+            socket.emit('onSelfJoinedMeeting', meetingId, socket.id, socket.userName, socket.session, tempList);
         });
 
         socket.on('LeaveMeeting', function() {
-            var meetingID = users[socket.id].meetingID;
+            var meetingId = users[socket.id].meetingId;
 
-            io.to(meetingID).emit('onUserLeftMeeting', meetingID, socket.id, socket.username, socket.session);
-            socket.emit('onSelfLeftMeeting', meetingID, socket.id, socket.username, socket.session);
+            io.to(meetingId).emit('onUserLeftMeeting', meetingId, socket.id, socket.userName, socket.session);
+            socket.emit('onSelfLeftMeeting', meetingId, socket.id, socket.userName, socket.session);
 
             socket.disconnect();
             
@@ -120,13 +120,13 @@ module.exports = exports = function(app, socketCallback) {
         });
 
         socket.on('SendMessageToMeeting', function(message, toUser) {
-            var meetingID = users[socket.id].meetingID;
+            var meetingId = users[socket.id].meetingId;
 
-            console.log('user name is ' + socket.username + ' meeting is ' + meetingID);
+            console.log('user name is ' + socket.userName + ' meeting is ' + meetingId);
             if (toUser != "") {
-                io.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, true);
+                io.to(meetingId).emit('onMeetingMessageReceived', message, socket.userName, socket.id, true);
             } else {
-                io.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, false);
+                io.to(meetingId).emit('onMeetingMessageReceived', message, socket.userName, socket.id, false);
             }
         });
 
@@ -370,12 +370,12 @@ module.exports = exports = function(app, socketCallback) {
             try {
                 console.log('disconnect has been triggered');
                 console.log(users +' before ');
-                var meetingID = users[this.id].meetingID;
+                var meetingId = users[this.id].meetingId;
                 var userName = users[this.id].userName;
 
                 console.log(userName + ' has left.');
-                io.to(meetingID).emit('onUserLeftMeeting', meetingID, this.id, userName, this.session);
-                socket.emit('onSelfLeftMeeting', meetingID, socket.id, userName, socket.session);
+                io.to(meetingId).emit('onUserLeftMeeting', meetingId, this.id, userName, this.session);
+                socket.emit('onSelfLeftMeeting', meetingId, socket.id, userName, socket.session);
 
                 console.log('about to delete sockets');
                 console.log(JSON.stringify(users, null, 4));
