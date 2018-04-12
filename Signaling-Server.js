@@ -112,13 +112,11 @@ module.exports = exports = function(app, socketCallback) {
             var meetingID = users[socket.id].meetingID;
 
             io.to(meetingID).emit('onUserLeftMeeting', meetingID, socket.id, socket.username, socket.session);
+            socket.emit('onSelfLeftMeeting', meetingID, socket.id, socket.username, socket.session);
 
             socket.disconnect();
-
-            // delete users[socket.id];
-            // delete listOfUsers[socket.id];
             
-            socket.emit('onSelfLeftMeeting', meetingID, socket.id, socket.username, socket.session);
+            
         });
 
         socket.on('SendMessageToMeeting', function(message, toUser) {
@@ -370,12 +368,20 @@ module.exports = exports = function(app, socketCallback) {
 
         socket.on('disconnect', function() {
             try {
+                console.log('disconnect has been triggered');
+                console.log(users +' before ');
                 var meetingID = users[this.id].meetingID;
-                console.log(this.username + 'has left..');
-                io.to(meetingID).emit('onUserLeftMeeting', meetingID, this.id, this.username, this.session);
+                var userName = users[this.id].userName;
+
+                console.log(userName + ' has left.');
+                io.to(meetingID).emit('onUserLeftMeeting', meetingID, this.id, userName, this.session);
+                socket.emit('onSelfLeftMeeting', meetingID, socket.id, userName, socket.session);
+
                 delete socket.namespace.sockets[this.id];
                 delete users[this.id];
                 delete listOfUsers[this.id];
+
+                console.log(users +' after');
                 
             } catch (e) {}
 
