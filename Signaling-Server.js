@@ -103,7 +103,8 @@ module.exports = exports = function(app, socketCallback) {
             console.log('just checking ..' + users[socket.id].meetingId)
             //send a new list of users w/ session to view to the users in my meeting
             var tempList = _.where(users, { meetingId: meetingId });
-
+            console.log('templist : ' + JSON.stringify(tempList, null, 4));
+                
             socket.broadcast.to(meetingId).emit('onJoinedMeeting', meetingId, socket.id, socket.userName, socket.session, tempList);
             socket.emit('onSelfJoinedMeeting', meetingId, socket.id, socket.userName, socket.session, tempList);
         });
