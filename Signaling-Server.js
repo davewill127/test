@@ -36,6 +36,7 @@ module.exports = exports = function(app, socketCallback) {
         io.sockets.on('connection', onConnection);
     }
 
+
     function findClientsSocket(roomId, namespace) {
         var res = []
             // the default namespace is "/"
@@ -78,11 +79,11 @@ module.exports = exports = function(app, socketCallback) {
         socket.session = params.session;
 
         //main user list
-        users[socket.id] = {
+        users.push({
             id: socket.id,
             userName: socket.userName,
             session: socket.session
-        };
+        });
 
         listOfUsers[socket.userid] = {
             socket: socket,
@@ -94,36 +95,39 @@ module.exports = exports = function(app, socketCallback) {
         };
 
         socket.on('JoinMeeting', function(meetingId) {
-
+            var user = users.filter(x => {return x.id === socket.id })[0];
             console.log('joining ' + meetingId + ' with socket id ' + socket.id + ' user ' + socket.userName);
             socket.join(meetingId);
             //update user list with current meeting ID
-            users[socket.id].meetingId = meetingId;
 
-            console.log('just checking ..' + users[socket.id].meetingId)
+            user.meetingId = meetingId;
+
+            console.log('just checking ..' + user.meetingId);
+
             //send a new list of users w/ session to view to the users in my meeting
-            var tempList = _.where(users, { meetingId: users[socket.id].meetingId });
+            var tempList = users.filter(x => {return x.meetingId === meetingId });
+
             console.log('templist : ' + JSON.stringify(tempList, null, 4));
                 
-            socket.broadcast.to(meetingId).emit('onJoinedMeeting', meetingId, socket.id, socket.userName, socket.session, tempList);
+            io.to(meetingId).emit('onJoinedMeeting', meetingId, socket.id, socket.userName, socket.session, tempList);
             socket.emit('onSelfJoinedMeeting', meetingId, socket.id, socket.userName, socket.session, tempList);
         });
 
         socket.on('LeaveMeeting', function() {
-            var meetingId = users[socket.id].meetingId;
+            var user = users.filter(x => {return x.id === socket.id })[0];
+            
 
-            io.to(meetingId).emit('onUserLeftMeeting', meetingId, socket.id, socket.userName, socket.session);
-            socket.emit('onSelfLeftMeeting', meetingId, socket.id, socket.userName, socket.session);
+            io.to(meetingId).emit('onUserLeftMeeting', user.meetingId, socket.id, socket.userName, socket.session);
+            socket.emit('onSelfLeftMeeting', user.meetingId, socket.id, socket.userName, socket.session);
 
             socket.disconnect();
-            
-            
         });
 
         socket.on('SendMessageToMeeting', function(message, toUser) {
-            var meetingId = users[socket.id].meetingId;
+            var user = users.filter(x => {return x.id === socket.id })[0];
+            
 
-            console.log('user name is ' + socket.userName + ' meeting is ' + meetingId);
+            console.log('user name is ' + socket.userName + ' meeting is ' + user.meetingId);
             if (toUser != "") {
                 io.to(meetingId).emit('onMeetingMessageReceived', message, socket.userName, socket.id, true);
             } else {
@@ -138,77 +142,6 @@ module.exports = exports = function(app, socketCallback) {
 
                 for (var user in listOfUsers[socket.userid].connectedWith) {
                     listOfUsers[user].socket.emit('extra-data-updated', socket.userid, extra);
-                }
-            } catch (e) {}
-        });
-
-        socket.on('become-a-public-moderator', function() {
-            try {
-                if (!listOfUsers[socket.userid]) return;
-                listOfUsers[socket.userid].isPublic = true;
-            } catch (e) {}
-        });
-
-        socket.on('dont-make-me-moderator', function() {
-            try {
-                if (!listOfUsers[socket.userid]) return;
-                listOfUsers[socket.userid].isPublic = false;
-            } catch (e) {}
-        });
-
-        socket.on('get-public-moderators', function(userIdStartsWith, callback) {
-            try {
-                userIdStartsWith = userIdStartsWith || '';
-                var allPublicModerators = [];
-                for (var moderatorId in listOfUsers) {
-                    if (listOfUsers[moderatorId].isPublic && moderatorId.indexOf(userIdStartsWith) === 0 && moderatorId !== socket.userid) {
-                        var moderator = listOfUsers[moderatorId];
-                        allPublicModerators.push({
-                            userid: moderatorId,
-                            extra: moderator.extra
-                        });
-                    }
-                }
-
-                callback(allPublicModerators);
-            } catch (e) {}
-        });
-
-        socket.on('changed-uuid', function(newUserId, callback) {
-            if (params.dontUpdateUserId) {
-                delete params.dontUpdateUserId;
-                return;
-            }
-
-            try {
-                if (listOfUsers[socket.userid] && listOfUsers[socket.userid].socket.id == socket.userid) {
-                    if (newUserId === socket.userid) return;
-
-                    var oldUserId = socket.userid;
-                    listOfUsers[newUserId] = listOfUsers[oldUserId];
-                    listOfUsers[newUserId].socket.userid = socket.userid = newUserId;
-                    delete listOfUsers[oldUserId];
-
-                    callback();
-                    return;
-                }
-
-                socket.userid = newUserId;
-                listOfUsers[socket.userid] = {
-                    socket: socket,
-                    connectedWith: {},
-                    isPublic: false,
-                    extra: {}
-                };
-
-                callback();
-            } catch (e) {}
-        });
-
-        socket.on('set-password', function(password) {
-            try {
-                if (listOfUsers[socket.userid]) {
-                    listOfUsers[socket.userid].password = password;
                 }
             } catch (e) {}
         });
@@ -369,14 +302,14 @@ module.exports = exports = function(app, socketCallback) {
 
         socket.on('disconnect', function() {
             try {
+                var user = users.filter(x => {return x.id === socket.id })[0];
+            
                 console.log('disconnect has been triggered');
                 console.log(users +' before ');
-                var meetingId = users[this.id].meetingId;
-                var userName = users[this.id].userName;
-
+                
                 console.log(userName + ' has left.');
-                io.to(meetingId).emit('onUserLeftMeeting', meetingId, this.id, userName, this.session);
-                socket.emit('onSelfLeftMeeting', meetingId, socket.id, userName, socket.session);
+                io.to(user.meetingId).emit('onUserLeftMeeting', user.meetingId, this.id, user.userName, this.session);
+                socket.emit('onSelfLeftMeeting', user.meetingId, socket.id, user.userName, socket.session);
 
                 console.log('about to delete sockets');
                 console.log(JSON.stringify(users, null, 4));
