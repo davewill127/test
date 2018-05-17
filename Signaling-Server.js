@@ -1,9 +1,6 @@
-// Muaz Khan      - www.MuazKhan.com
-// MIT License    - www.WebRTC-Experiment.com/licence
-
-// 2017-12-31 updated by gaetan siry to work with the iConfRTC SDK 
 // AVSPEED RTC Signaling Server
 // info@avspeed.com
+// gaetan siry 4/19/2018
 
 module.exports = exports = function(app, socketCallback) {
     var listOfUsers = {};
@@ -96,34 +93,70 @@ module.exports = exports = function(app, socketCallback) {
         socket.on('JoinMeeting', function(meetingID) {
 
             console.log('joining with socket id ' + socket.id + ' user ' + socket.username);
+            
+            //join the room
             socket.join(meetingID);
+
+            
             //update user list with current meeting ID
             users[socket.id].meetingID = meetingID;
 
-            //send a new list of users w/ session to view to the users in my meeting
-            var tempList = _.where(users, { meetingID: meetingID });
+             //send a new list of users w/ session to view to the users in my meeting
+             var tempList = _.where(users, { meetingID: meetingID });
 
-            socket.broadcast.to(meetingID).emit('onJoinedMeeting', meetingID, socket.id, socket.username, socket.session, tempList);
+
             socket.emit('onSelfJoinedMeeting', meetingID, socket.id, socket.username, socket.session, tempList);
+            
+            socket.broadcast.to(meetingID).emit('onJoinedMeeting', meetingID, socket.id, socket.username, socket.session, tempList);
+            
+        });
+
+        socket.on('ScreenSharing', function() {
+
+
+            console.log('user ' + socket.username + ' sharing screen');
+            
+            socket.broadcast.to(users[socket.id].meetingID ).emit('onScreenSharing', socket.id, socket.username, socket.session)
+            
+        });
+
+        socket.on('MuteAudio', function() {
+            console.log('audio muted user ' + socket.username);
+            socket.broadcast.to(users[socket.id].meetingID).emit('onUserAudioMuted', socket.id, socket.username, socket.session);
+        });
+
+        socket.on('MuteVideo', function() {
+            console.log('video muted user ' + socket.username);
+            socket.broadcast.to(users[socket.id].meetingID).emit('onUserVideoMuted', socket.id, socket.username, socket.session);
+        });
+
+        socket.on('UnMuteAudio', function() {
+            console.log('audio un-muted user ' + socket.username);
+            socket.broadcast.to(users[socket.id].meetingID).emit('onUserAudioUnMuted', socket.id, socket.username, socket.session);
+        });
+
+        socket.on('UnMuteVideo', function() {
+            console.log('video un-muted user ' + socket.username);
+            socket.broadcast.to(users[socket.id].meetingID).emit('onUserVideoUnMuted', socket.id, socket.username, socket.session);
         });
 
         socket.on('LeaveMeeting', function() {
-            var meetingID = users[socket.id].meetingID;
 
-            delete users[socket.id];
-            delete listOfUsers[socket.id];
-            socket.broadcast.to(meetingID).emit('onUserLeftMeeting', meetingID, socket.id, socket.username, socket.session);
-            socket.emit('onSelfLeftMeeting', meetingID, socket.id, socket.username, socket.session);
+            var user = users[socket.id];
+            io.to(user.meetingID).emit('onUserLeftMeeting', user.meetingID, socket.id, socket.username, socket.session);
+            socket.emit('onSelfLeftMeeting', user.meetingID, socket.id, socket.username, socket.session);
+            socket.notifiedleave = true;
+            socket.disconnect();
         });
 
         socket.on('SendMessageToMeeting', function(message, toUser) {
-            var meetingID = users[socket.id].meetingID;
-
+            var user = users[socket.id];
+            
             console.log('user name is ' + socket.username);
             if (toUser != "") {
-                socket.broadcast.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, true);
+                io.to(user.meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, true);
             } else {
-                io.to(meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, false);
+                io.to(user.meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, false);
             }
         });
 
@@ -365,13 +398,21 @@ module.exports = exports = function(app, socketCallback) {
 
         socket.on('disconnect', function() {
             try {
-                var meetingID = users[this.id].meetingID;
+                var user = users[this.id];
 
-                delete socket.namespace.sockets[this.id];
+                console.info( user.userName + ' has left');
+
+                //do not notify twice
+                if (!socket.notifiedleave)
+                {
+                    io.to(user.meetingID).emit('onUserLeftMeeting',  user.meetingID, this.id, user.userName,  user.session);
+                    socket.emit('onSelfLeftMeeting', user.meetingID, this.id, user.userName, user.session);
+                }
+
                 delete users[this.id];
                 delete listOfUsers[this.id];
-                socket.broadcast.to(meetingID).emit('onUserLeftMeeting', meetingID, this.id, this.username, this.session);
-                socket.emit('onSelfLeftMeeting', meetingID, this.id, this.username, this.session);
+
+                delete socket.namespace.sockets[this.id];
             } catch (e) {}
 
             try {
