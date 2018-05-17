@@ -28,7 +28,7 @@ function serverHandler(request, response) {
         response.writeHead(404, {
             'Content-Type': 'text/plain'
         });
-        response.write('404 Not Found: ' + path.join('/', uri) + '\n');
+        response.write('404 Not Found:' + path.join('/', uri) + '\n');
         response.end();
         return;
     }
