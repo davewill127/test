@@ -91,7 +91,6 @@ module.exports = exports = function(app, socketCallback) {
             session: socket.session
         };
 
-<<<<<<< HEAD
         socket.on('JoinMeeting', function(meetingID) {
 
             console.log('joining with socket id ' + socket.id + ' user ' + socket.username);
@@ -100,19 +99,12 @@ module.exports = exports = function(app, socketCallback) {
             socket.join(meetingID);
 
             
-=======
-        socket.on('JoinMeeting', function(meetingId) {
-            var user = users.filter(x => {return x.id === socket.id })[0];
-            console.log('joining ' + meetingId + ' with socket id ' + socket.id + ' user ' + socket.userName);
-            socket.join(meetingId);
->>>>>>> 96b59ee883d0d32de2cfac8182b1cce26c4f3648
             //update user list with current meeting ID
 
             user.meetingId = meetingId;
 
             console.log('just checking ..' + user.meetingId);
 
-<<<<<<< HEAD
              //send a new list of users w/ session to view to the users in my meeting
              var tempList = _.where(users, { meetingID: meetingID });
 
@@ -158,29 +150,10 @@ module.exports = exports = function(app, socketCallback) {
             io.to(user.meetingID).emit('onUserLeftMeeting', user.meetingID, socket.id, socket.username, socket.session);
             socket.emit('onSelfLeftMeeting', user.meetingID, socket.id, socket.username, socket.session);
             socket.notifiedleave = true;
-=======
-            //send a new list of users w/ session to view to the users in my meeting
-            var tempList = users.filter(x => {return x.meetingId === meetingId });
-
-            console.log('templist : ' + JSON.stringify(tempList, null, 4));
-                
-            io.to(meetingId).emit('onJoinedMeeting', meetingId, socket.id, socket.userName, socket.session, tempList);
-            socket.emit('onSelfJoinedMeeting', meetingId, socket.id, socket.userName, socket.session, tempList);
-        });
-
-        socket.on('LeaveMeeting', function() {
-            var user = users.filter(x => {return x.id === socket.id })[0];
-            
-
-            io.to(meetingId).emit('onUserLeftMeeting', user.meetingId, socket.id, socket.userName, socket.session);
-            socket.emit('onSelfLeftMeeting', user.meetingId, socket.id, socket.userName, socket.session);
-
->>>>>>> 96b59ee883d0d32de2cfac8182b1cce26c4f3648
             socket.disconnect();
         });
 
         socket.on('SendMessageToMeeting', function(message, toUser) {
-<<<<<<< HEAD
             var user = users[socket.id];
             
             console.log('user name is ' + socket.username);
@@ -188,16 +161,6 @@ module.exports = exports = function(app, socketCallback) {
                 io.to(user.meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, true);
             } else {
                 io.to(user.meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, false);
-=======
-            var user = users.filter(x => {return x.id === socket.id })[0];
-            
-
-            console.log('user name is ' + socket.userName + ' meeting is ' + user.meetingId);
-            if (toUser != "") {
-                io.to(meetingId).emit('onMeetingMessageReceived', message, socket.userName, socket.id, true);
-            } else {
-                io.to(meetingId).emit('onMeetingMessageReceived', message, socket.userName, socket.id, false);
->>>>>>> 96b59ee883d0d32de2cfac8182b1cce26c4f3648
             }
         });
 
@@ -368,7 +331,6 @@ module.exports = exports = function(app, socketCallback) {
 
         socket.on('disconnect', function() {
             try {
-<<<<<<< HEAD
                 var user = users[this.id];
 
                 console.info( user.userName + ' has left');
@@ -384,27 +346,6 @@ module.exports = exports = function(app, socketCallback) {
                 delete listOfUsers[this.id];
 
                 delete socket.namespace.sockets[this.id];
-=======
-                var user = users.filter(x => {return x.id === socket.id })[0];
-            
-                console.log('disconnect has been triggered');
-                console.log(users +' before ');
-                
-                console.log(userName + ' has left.');
-                io.to(user.meetingId).emit('onUserLeftMeeting', user.meetingId, this.id, user.userName, this.session);
-                socket.emit('onSelfLeftMeeting', user.meetingId, socket.id, user.userName, socket.session);
-
-                console.log('about to delete sockets');
-                console.log(JSON.stringify(users, null, 4));
-                
-                delete users[this.id];
-                delete listOfUsers[this.id];
-                delete socket.namespace.sockets[this.id];
-                
-                console.log(JSON.stringify(users, null, 4));   
-                console.log(users +' after');
-                
->>>>>>> 96b59ee883d0d32de2cfac8182b1cce26c4f3648
             } catch (e) {}
 
             try {
