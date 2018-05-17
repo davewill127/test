@@ -61,11 +61,6 @@ var app;
 
 app = server.createServer(serverHandler);
 
-app.configure(socketio({
-    origin: '*',
-    transport: ['websocket']
-  }, io => {}))
-
 app = app.listen(process.env.PORT || 9000, process.env.IP || "0.0.0.0", function() {
     var addr = app.address();
     //console.log('RTC Signaling Server listening on port ' + app.get('port'));
