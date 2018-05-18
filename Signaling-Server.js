@@ -4,7 +4,7 @@
 
 module.exports = exports = function(app, socketCallback) {
     var listOfUsers = {};
-    var users = [];
+    var users = {};
     var shiftedModerationControls = {};
     var ScalableBroadcast;
 
@@ -32,7 +32,6 @@ module.exports = exports = function(app, socketCallback) {
 
         io.sockets.on('connection', onConnection);
     }
-
 
     function findClientsSocket(roomId, namespace) {
         var res = []
@@ -72,22 +71,22 @@ module.exports = exports = function(app, socketCallback) {
         var decodedUser = decodedUserStr.toString();
 
         socket.userid = params.userid;
-        socket.userName = decodedUser;
+        socket.username = decodedUser;
         socket.session = params.session;
 
         //main user list
-        users.push({
+        users[socket.id] = {
             id: socket.id,
-            userName: socket.userName,
+            userName: socket.username,
             session: socket.session
-        });
+        };
 
         listOfUsers[socket.userid] = {
             socket: socket,
             connectedWith: {},
             isPublic: false, // means: isPublicModerator
             extra: {},
-            userName: socket.userName,
+            userName: socket.username,
             session: socket.session
         };
 
@@ -100,10 +99,7 @@ module.exports = exports = function(app, socketCallback) {
 
             
             //update user list with current meeting ID
-
-            user.meetingId = meetingId;
-
-            console.log('just checking ..' + user.meetingId);
+            users[socket.id].meetingID = meetingID;
 
              //send a new list of users w/ session to view to the users in my meeting
              var tempList = _.where(users, { meetingID: meetingID });
@@ -171,6 +167,77 @@ module.exports = exports = function(app, socketCallback) {
 
                 for (var user in listOfUsers[socket.userid].connectedWith) {
                     listOfUsers[user].socket.emit('extra-data-updated', socket.userid, extra);
+                }
+            } catch (e) {}
+        });
+
+        socket.on('become-a-public-moderator', function() {
+            try {
+                if (!listOfUsers[socket.userid]) return;
+                listOfUsers[socket.userid].isPublic = true;
+            } catch (e) {}
+        });
+
+        socket.on('dont-make-me-moderator', function() {
+            try {
+                if (!listOfUsers[socket.userid]) return;
+                listOfUsers[socket.userid].isPublic = false;
+            } catch (e) {}
+        });
+
+        socket.on('get-public-moderators', function(userIdStartsWith, callback) {
+            try {
+                userIdStartsWith = userIdStartsWith || '';
+                var allPublicModerators = [];
+                for (var moderatorId in listOfUsers) {
+                    if (listOfUsers[moderatorId].isPublic && moderatorId.indexOf(userIdStartsWith) === 0 && moderatorId !== socket.userid) {
+                        var moderator = listOfUsers[moderatorId];
+                        allPublicModerators.push({
+                            userid: moderatorId,
+                            extra: moderator.extra
+                        });
+                    }
+                }
+
+                callback(allPublicModerators);
+            } catch (e) {}
+        });
+
+        socket.on('changed-uuid', function(newUserId, callback) {
+            if (params.dontUpdateUserId) {
+                delete params.dontUpdateUserId;
+                return;
+            }
+
+            try {
+                if (listOfUsers[socket.userid] && listOfUsers[socket.userid].socket.id == socket.userid) {
+                    if (newUserId === socket.userid) return;
+
+                    var oldUserId = socket.userid;
+                    listOfUsers[newUserId] = listOfUsers[oldUserId];
+                    listOfUsers[newUserId].socket.userid = socket.userid = newUserId;
+                    delete listOfUsers[oldUserId];
+
+                    callback();
+                    return;
+                }
+
+                socket.userid = newUserId;
+                listOfUsers[socket.userid] = {
+                    socket: socket,
+                    connectedWith: {},
+                    isPublic: false,
+                    extra: {}
+                };
+
+                callback();
+            } catch (e) {}
+        });
+
+        socket.on('set-password', function(password) {
+            try {
+                if (listOfUsers[socket.userid]) {
+                    listOfUsers[socket.userid].password = password;
                 }
             } catch (e) {}
         });
