@@ -73,12 +73,15 @@ module.exports = exports = function(app, socketCallback) {
         socket.userid = params.userid;
         socket.username = decodedUser;
         socket.session = params.session;
+        socket.isView = params.isView === 'true';
 
         //main user list
         users[socket.id] = {
             id: socket.id,
             userName: socket.username,
-            session: socket.session
+            session: socket.session,
+            isView: socket.isView
+            
         };
 
         listOfUsers[socket.userid] = {
@@ -402,11 +405,14 @@ module.exports = exports = function(app, socketCallback) {
 
                 console.info( user.userName + ' has left');
 
-                //do not notify twice
-                if (!socket.notifiedleave)
+                if (!user.isView)
                 {
-                    io.to(user.meetingID).emit('onUserLeftMeeting',  user.meetingID, this.id, user.userName,  user.session);
-                    socket.emit('onSelfLeftMeeting', user.meetingID, this.id, user.userName, user.session);
+                //do not notify twice
+                    if (!socket.notifiedleave)
+                    {
+                        io.to(user.meetingID).emit('onUserLeftMeeting',  user.meetingID, this.id, user.userName,  user.session);
+                        socket.emit('onSelfLeftMeeting', user.meetingID, this.id, user.userName, user.session);
+                    }
                 }
 
                 delete users[this.id];
