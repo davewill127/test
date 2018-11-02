@@ -121,8 +121,8 @@ module.exports = exports = function(app, socketCallback) {
 
         socket.on('AddedVideo', function() {
             console.log('added video ' + socket.id + ' user ' + socket.username);
-            console.log(users);
-            socket.broadcast.to(users[socket.id].meetingID).emit('onAddedVideo', meetingID, socket.id, socket.username, socket.session); 
+            var meetingID = users[socket.id].meetingID;
+            socket.broadcast.to(meetingID).emit('onAddedVideo', meetingID, socket.id, socket.username, socket.session); 
         });
 
         socket.on('ScreenSharing', function() {
