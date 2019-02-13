@@ -1,7 +1,7 @@
 // Muaz Khan      - www.MuazKhan.com
 // MIT License    - www.WebRTC-Experiment.com/licence
 
-// 2017-12-31 updated by gaetan siry to work with the iConfRTC SDK 
+// 2019-02-13 updated by gaetan siry to work with the iConfRTC SDK 
 // AVSPEED RTC Signaling Server
 // info@avspeed.com
 
@@ -33,7 +33,7 @@ function serverHandler(request, response) {
         return;
     }
 
-    fs.readFile(filename, 'binary', function(err, file) {
+    fs.readFile(filename, 'binary', function (err, file) {
         if (err) {
             response.writeHead(500, {
                 'Content-Type': 'text/plain'
@@ -61,15 +61,15 @@ var app;
 
 app = server.createServer(serverHandler);
 
-app = app.listen(process.env.PORT || 9000, process.env.IP || "0.0.0.0", function() {
+app = app.listen(process.env.PORT || 9000, process.env.IP || "0.0.0.0", function () {
     var addr = app.address();
-    //console.log('RTC Signaling Server listening on port ' + app.get('port'));
+
     console.log("AVSPEED RTC Signaling Server listening at ", addr.address + ":" + addr.port);
 });
 
 require('./underscore-min.js');
 
-require('./Signaling-Server.js')(app, function(socket) {
+require('./Signaling-Server.js')(app, function (socket) {
     try {
         var params = socket.handshake.query;
 
@@ -77,11 +77,11 @@ require('./Signaling-Server.js')(app, function(socket) {
             params.socketCustomEvent = 'custom-message';
         }
 
-        socket.on(params.socketCustomEvent, function(message) {
+        socket.on(params.socketCustomEvent, function (message) {
             try {
                 console.log(message);
                 socket.broadcast.emit(params.socketCustomEvent, message);
-            } catch (e) {}
+            } catch (e) { }
         });
-    } catch (e) {}
+    } catch (e) { }
 });
