@@ -1,2 +1,8 @@
-A Modified version of Muaz Khan's Socket.io based signaliing server for WebRTC.
-This version is designed to be used with the AVSPEED iConfRTC SDK
+# clone from github
+https://github.com/avspeed/RTCSignaling.io.git
+
+# install dependencies
+npm install
+
+# run signaling server ( with optional port )
+node server --port=9001
