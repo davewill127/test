@@ -108,7 +108,7 @@ module.exports = exports = function(app, socketCallback) {
             users[socket.id].meetingID = meetingID;
 
              //send a new list of users w/ session to view to the users in my meeting
-             var tempList = _.where(users, { meetingID: meetingID });
+             var tempList = _.filter(users, { meetingID: meetingID });
 
 
             socket.emit('onSelfJoinedMeeting', meetingID, socket.id, socket.username, socket.session, tempList);
@@ -119,9 +119,16 @@ module.exports = exports = function(app, socketCallback) {
 
         socket.on('GetParticipants', function(){
             var meetingID = users[socket.id].meetingID;
-            var participantList = _.where(users, { meetingID: meetingID });
+            var participantList = _.filter(users, { meetingID: meetingID });
 
-            socket.broadcast.to(meetingID).emit('onGetParticipants', meetingID, socket.username, socket.session, socket.id, participantList);
+            socket.broadcast.to(meetingID).emit('onGetParticipants', participantList);
+        });
+
+        socket.on('GetParticipant', function(connectionId){
+            var meetingID = users[socket.id].meetingID;
+            var participant = users[connectionId];
+
+            socket.broadcast.to(meetingID).emit('onGetParticipant', participant);
         });
 
         socket.on('AddedVideo', function() {
@@ -188,6 +195,10 @@ module.exports = exports = function(app, socketCallback) {
                 io.to(user.meetingID).emit('onMeetingMessageReceived', message, socket.username, socket.id, false);
             }
         });
+
+        socket.on('CustomFunction', function(name, args){
+            window[name](args);
+        })
 
         function onMessageCallback(message) {
             try {
