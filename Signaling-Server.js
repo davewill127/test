@@ -124,11 +124,11 @@ module.exports = exports = function(app, socketCallback) {
             socket.broadcast.to(meetingID).emit('onGetParticipants', participantList);
         });
 
-        socket.on('GetParticipant', function(connectionId){
+        socket.on('GetParticipant', function(connectionId, fn){
             var meetingID = users[socket.id].meetingID;
             var participant = users[connectionId];
-
-            socket.broadcast.to(meetingID).emit('onGetParticipant', participant);
+            fn(participant);
+            //socket.broadcast.to(meetingID).emit('onGetParticipant', participant);
         });
 
         socket.on('AddedVideo', function() {
