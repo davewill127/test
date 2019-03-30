@@ -117,42 +117,56 @@ module.exports = exports = function(app, socketCallback) {
             
         });
 
+        socket.on('GetParticipants', function(){
+            var meetingID = users[socket.id].meetingID;
+            var participantList = _.where(users, { meetingID: meetingID });
+
+            socket.broadcast.to(meetingID).emit('onGetParticipants', meetingID, socket.username, socket.session, socket.id, participantList);
+        });
+
         socket.on('AddedVideo', function() {
             console.log('added video ' + socket.id + ' user ' + socket.username);
             var meetingID = users[socket.id].meetingID;
-            socket.broadcast.to(meetingID).emit('onAddedVideo', meetingID, socket.username, socket.session, socket.id); 
+            users[socket.id].video = true;
+            socket.broadcast.to(meetingID).emit('onAddedVideo', meetingID, socket.username, socket.session, socket.id, users[socket.id]); 
         });
 
         socket.on('RemovedVideo', function() {
             console.log('removed video ' + socket.id + ' user ' + socket.username);
             var meetingID = users[socket.id].meetingID;
-            socket.broadcast.to(meetingID).emit('onRemovedVideo', meetingID, socket.username, socket.session, socket.id); 
+            users[socket.id].video = false;
+            socket.broadcast.to(meetingID).emit('onRemovedVideo', meetingID, socket.username, socket.session, socket.id, users[socket.id]); 
         });
 
-        socket.on('ScreenSharing', function() {
+        socket.on('AddedScreenSharing', function() {
             console.log('user ' + socket.username + ' sharing screen');   
-            socket.broadcast.to(users[socket.id].meetingID ).emit('onScreenSharing', socket.id, socket.username, socket.session)
-            
+            socket.broadcast.to(users[socket.id].meetingID ).emit('onAddedScreenSharing', socket.id, socket.username, socket.session, users[socket.id], users[socket.id])
+        });
+
+        socket.on('RemovedScreenSharing', function() {
+            console.log('user ' + socket.username + ' stopped sharing screen');   
+            socket.broadcast.to(users[socket.id].meetingID ).emit('onRemovedScreenSharing', socket.id, socket.username, socket.session, users[socket.id], users[socket.id])
         });
 
         socket.on('MuteAudio', function() {
             console.log('audio muted user ' + socket.username);
-            socket.broadcast.to(users[socket.id].meetingID).emit('onUserAudioMuted', socket.id, socket.username, socket.session);
+            users[socket.id].mic = false;
+            socket.broadcast.to(users[socket.id].meetingID).emit('onUserAudioMuted', socket.id, socket.username, socket.session, users[socket.id]);
         });
 
         socket.on('MuteVideo', function() {
             console.log('video muted user ' + socket.username);
-            socket.broadcast.to(users[socket.id].meetingID).emit('onUserVideoMuted', socket.id, socket.username, socket.session);
+            socket.broadcast.to(users[socket.id].meetingID).emit('onUserVideoMuted', socket.id, socket.username, socket.session, users[socket.id]);
         });
 
         socket.on('UnMuteAudio', function() {
             console.log('audio un-muted user ' + socket.username);
-            socket.broadcast.to(users[socket.id].meetingID).emit('onUserAudioUnMuted', socket.id, socket.username, socket.session);
+            socket.broadcast.to(users[socket.id].meetingID).emit('onUserAudioUnMuted', socket.id, socket.username, socket.session, users[socket.id]);
         });
 
         socket.on('UnMuteVideo', function() {
             console.log('video un-muted user ' + socket.username);
-            socket.broadcast.to(users[socket.id].meetingID).emit('onUserVideoUnMuted', socket.id, socket.username, socket.session);
+            socket.broadcast.to(users[socket.id].meetingID).emit('onUserVideoUnMuted', socket.id, socket.username, socket.session, users[socket.id]);
         });
 
         socket.on('LeaveMeeting', function() {
