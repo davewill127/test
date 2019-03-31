@@ -120,8 +120,7 @@ module.exports = exports = function(app, socketCallback) {
         socket.on('GetParticipants', function(){
             var meetingID = users[socket.id].meetingID;
             var participantList = _.filter(users, { meetingID: meetingID });
-
-            socket.broadcast.to(meetingID).emit('onGetParticipants', participantList);
+            fn(participantList);
         });
 
         socket.on('GetParticipant', function(connectionId, fn){
