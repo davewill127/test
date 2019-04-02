@@ -117,7 +117,30 @@ module.exports = exports = function(app, socketCallback) {
             
         });
 
-        socket.on('GetParticipants', function(){
+        socket.on('JoinWebMeeting', function(meetingID, fn) {
+
+            console.log('joining with socket id ' + socket.id + ' user ' + socket.username);
+            
+            //join the room
+            socket.join(meetingID);
+
+            
+            //update user list with current meeting ID
+            users[socket.id].meetingID = meetingID;
+
+             //send a new list of users w/ session to view to the users in my meeting
+             var participants = _.filter(users, { meetingID: meetingID });
+
+            var connectionProperties = {meetingId : meetingID, connectionId: socket.id, userName: socket.userName, session: socket.session, participants: participants}
+            
+            socket.emit('onSelfJoinedMeeting', meetingID, socket.id, socket.username, socket.session, participants);
+            
+            socket.broadcast.to(meetingID).emit('onJoinedMeeting', meetingID, socket.id, socket.username, socket.session, participants);
+            
+            fn(connectionProperties);
+        });
+
+        socket.on('GetParticipants', function(fn){
             var meetingID = users[socket.id].meetingID;
             var participantList = _.filter(users, { meetingID: meetingID });
             fn(participantList);
