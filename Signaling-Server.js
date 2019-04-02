@@ -179,7 +179,7 @@ module.exports = exports = function(app, socketCallback) {
 
         socket.on('MuteAudio', function() {
             console.log('audio muted user ' + socket.username);
-            users[socket.id].mic = false;
+            users[socket.id].micOn = false;
             socket.broadcast.to(users[socket.id].meetingID).emit('onUserAudioMuted', socket.id, socket.username, socket.session, users[socket.id]);
         });
 
@@ -189,6 +189,7 @@ module.exports = exports = function(app, socketCallback) {
         });
 
         socket.on('UnMuteAudio', function() {
+            users[socket.id].micOn = true;
             console.log('audio un-muted user ' + socket.username);
             socket.broadcast.to(users[socket.id].meetingID).emit('onUserAudioUnMuted', socket.id, socket.username, socket.session, users[socket.id]);
         });
