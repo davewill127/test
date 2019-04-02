@@ -131,7 +131,7 @@ module.exports = exports = function(app, socketCallback) {
              //send a new list of users w/ session to view to the users in my meeting
              var participants = _.filter(users, { meetingID: meetingID });
 
-            var connectionProperties = {meetingId : meetingID, connectionId: socket.id, userName: socket.userName, session: socket.session, participants: participants}
+            var connectionProperties = {meetingId : meetingID, connectionId: socket.id, userName: socket.username, session: socket.session, participants: participants}
             
             socket.emit('onSelfJoinedMeeting', meetingID, socket.id, socket.username, socket.session, participants);
             
