@@ -124,7 +124,19 @@ module.exports = exports = function(app, socketCallback) {
             //join the room
             socket.join(meetingID);
 
-            
+            //check to see if the user is creating the room or if the room already exists
+            var existing = _.filter(users, function(o) { return o.meetingID == meetingID });
+
+            if (existing.length == 0)
+            {
+                users[socket.id].host = true;
+                console.log(socket.username + 'is host of ' + meetingID);
+            }
+            else
+            {
+                users[socket.id].host = false;
+            }
+
             //update user list with current meeting ID
             users[socket.id].meetingID = meetingID;
 
@@ -168,13 +180,13 @@ module.exports = exports = function(app, socketCallback) {
         });
 
         socket.on('AddedScreenSharing', function() {
-            console.log('user ' + socket.username + ' sharing screen');   
-            socket.broadcast.to(users[socket.id].meetingID ).emit('onAddedScreenSharing', socket.id, socket.username, socket.session, users[socket.id], users[socket.id])
+            console.log('user ' + socket.username + ' added screen sharing');   
+            socket.broadcast.to(users[socket.id].meetingID ).emit('onAddedScreenSharing', socket.id, socket.username, socket.session, users[socket.id])
         });
 
         socket.on('RemovedScreenSharing', function() {
-            console.log('user ' + socket.username + ' stopped sharing screen');   
-            socket.broadcast.to(users[socket.id].meetingID ).emit('onRemovedScreenSharing', socket.id, socket.username, socket.session, users[socket.id], users[socket.id])
+            console.log('user ' + socket.username + ' removed screen sharing');   
+            socket.broadcast.to(users[socket.id].meetingID ).emit('onRemovedScreenSharing', socket.id, socket.username, socket.session, users[socket.id])
         });
 
         socket.on('MuteAudio', function() {
